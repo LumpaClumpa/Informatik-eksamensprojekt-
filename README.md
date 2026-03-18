@@ -2,3 +2,6 @@
 
 - Trello:
   https://trello.com/invite/b/69ba7b2a139b1c6745179f4a/ATTI7d4dcff875ed5185d8949fd5f447085dAA37A3FB/informatik-eksamensprojekt
+
+- Miro:
+https://miro.com/welcomeonboard/SElzMGhVcmtLb0ZEK0ExcTNkcC9oZmI1Wm5BYmo1S0VCT0FaNDN1bUMwSk95RXcyWGFGSk1xTTlJV3FKbTBWaWJmSVJwa2pyZnhwSVFlSGJ6RWJqRUpET2tYekt4bkF3SmJjZVNQejVmTUFMTmVWQVNZRmxyY1hoQmVkVjc5dTdBd044SHFHaVlWYWk0d3NxeHNmeG9BPT0hdjE=?share_link_id=516938424841
