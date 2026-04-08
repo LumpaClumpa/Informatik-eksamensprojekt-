@@ -35,9 +35,21 @@ def insertValueInTableColumn(value, table, column):
     conn.commit()
     conn.close()
 
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template("home.html")
+    return "HELLO WORLD"
+
+@app.route('/items', methods=['POST'])
+def create_item():
+    data = request.get_json()
+
+    # Validate input
+    if not data or 'name' not in data:
+        return jsonify({'error': 'Missing "name" in request data'}), 400
+
+    name = data['name']
+
+
 
 ''''@app.route("/arduino", methods=["POST"])
 def receive_from_arduino():
@@ -58,17 +70,29 @@ def receive_from_arduino():
     conn.close()
     return jsonify({"status": "ok", "lokale": lokale, "db": db_val, "ts": ts}), 201
 '''
-@app.route("/devices", methods=["GET"])
-def maalinger_for_devices(devices):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("SELECT user_id, users, device_id, status FROM devices ORDER BY ts DESC LIMIT 500", (lokale,))
-    rows = cur.fetchall()
-    conn.close()
-    # return ordered ascending by timestamp
-    rows = list(reversed(rows))
-    return jsonify([[r[0], r[1]] for r in rows])
 
-if __name__ == "__main__":
+
+# Define the GET /items endpoint
+@app.route('/items', methods=['GET'])
+def get_items():
+    conn = sqlite3.connect('drivhus.db')
+    cursor = conn.cursor()
+
+    data = {}
+
+    tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log"]
+
+    for table in tables:
+        cursor.execute(f"SELECT * FROM {table}")
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+        data[table] = [dict(zip(columns, row)) for row in rows]
+
+    conn.close()
+    return jsonify(data)
+
+
+if __name__ == '__main__':
     init_db()
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    if 'liveconsole' not in gethostname():
+        app.run()
