@@ -13,7 +13,7 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     # create tables
-    cur.execute("""CREATE TABLE IF NOT EXISTS devices (user_id INTEGER PRIMARY KEY,users VARCHAR, device_id INTEGER, status VARCHAR)""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS devices (user_id INTEGER PRIMARY KEY,users VARCHAR, device_id INTEGER, status VARCHAR, is_teacher VARCHAR)""")
 
     cur.execute("""CREATE TABLE IF NOT EXISTS sensors (sensor_id INTEGER PRIMARY KEY,zone_id INTEGER,sensor_type VARCHAR,is_active VARCHAR)""")
 
@@ -23,15 +23,19 @@ def init_db():
 
     cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at, DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
 
-def insertValueInTableColumn(value, table, column):
+tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log"]
+
+
+def insert_readings(readings_dict):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    columnb="efefe"
-    lokalenr=444
-    decibel=44
-    cur.execute("SELECT COUNT(*) FROM devices")
-    if cur.fetchone()[0] == 0:
-        cur.execute(f"INSERT INTO {table} ({column}, {columnb}) VALUES ({lokalenr}, {value})")
+    for table, rows in readings_dict.items():
+        if table in tables:  # Only insert into existing tables
+            for row in rows:
+                columns = ', '.join(row.keys())
+                placeholders = ', '.join('?' * len(row))
+                values = tuple(row.values())
+                cur.execute(f"INSERT OR REPLACE INTO {table} ({columns}) VALUES ({placeholders})", values)
     conn.commit()
     conn.close()
 
@@ -39,7 +43,7 @@ def insertValueInTableColumn(value, table, column):
 def home():
     return "HELLO WORLD"
 
-@app.route('/items', methods=['POST'])
+'''@app.route('/items', methods=['POST'])
 def create_item():
     data = request.get_json()
 
@@ -47,7 +51,7 @@ def create_item():
     if not data or 'name' not in data:
         return jsonify({'error': 'Missing "name" in request data'}), 400
 
-    name = data['name']
+    name = data['name']'''
 
 
 
@@ -80,19 +84,43 @@ def get_items():
 
     data = {}
 
-    tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log"]
+    # Create list of all tables in database
 
-    for table in tables:
+    for table in tables: # For each table fetch data, for each row create a dict with column names as keys and values as values, add to data dict with table name as key
         cursor.execute(f"SELECT * FROM {table}")
-        rows = cursor.fetchall()
-        columns = [col[0] for col in cursor.description]
+        rows = cursor.fetchall() # Fetch all rows from the current table
+        columns = [col[0] for col in cursor.description] # Get column names from cursor description
         data[table] = [dict(zip(columns, row)) for row in rows]
 
     conn.close()
     return jsonify(data)
 
+@app.route('/items', methods=['POST'])
+def create_items():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No JSON data received'}), 400
+    # Assume data is the readings dict with table names as keys
+    insert_readings(data)
+    return jsonify({'status': 'Data inserted successfully'}), 201
+
+
+readings = { # example data structure for readings
+    "devices": [
+        {"user_id": 1, "users": "Alice", "device_id": 101, "status": "online", "is_teacher": "TRUE"},
+        {"user_id": 2, "users": "Bob", "device_id": 102, "status": "offline", "is_teacher": "FALSE"},
+    ],
+    "sensors": [
+        {"sensor_id": 1, "zone_id": 1, "sensor_type": "temperature", "is_active": "yes"},
+        {"sensor_id": 2, "zone_id": 1, "sensor_type": "humidity", "is_active": "yes"}
+    ],
+}
+#serialize the data dictionary to a JSON string
+json_data = json.dumps(readings)
 
 if __name__ == '__main__':
     init_db()
+    # Insert the example data by loading from the JSON string
+    insert_readings(json.loads(json_data))
     if 'liveconsole' not in gethostname():
         app.run()
