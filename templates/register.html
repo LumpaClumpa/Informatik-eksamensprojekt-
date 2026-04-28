@@ -44,7 +44,7 @@
 
     <h1>Register en account</h1>
 
-    <form method="POST" id="roleForm">
+    <form method="POST" id="registerForm">
         <label for="username">Brugernavn: </label>
         <input type="text" id="username" name="username" required><br><br>
     
@@ -63,7 +63,7 @@
             <button id="passwordSubmit">Continue</button>
         </div>
         <script>
-            const form = document.getElementById("roleForm");
+            const form = document.getElementById("registerForm");
             const passwordBox = document.getElementById("passwordBox");
           
             form.addEventListener("submit", function (event) {
