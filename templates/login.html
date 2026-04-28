@@ -38,9 +38,9 @@
   <div class="topnav">
     <a href="{{url_for('home')}}">Home</a>
     <a href="#opgaver">Opgaver</a>
-    <a href="#planter">Plante Oversigt</a>
+    <a href="{{url_for('plants')}}">Plante Oversigt</a>
     <a class="active" href="#login">LogIn</a>
-    <a href="#signout">SignOut</a>
+    <a href="{{url_for('register')}}">Sign Up</a>
   </div>
 
   <h1>Login</h1>
@@ -55,8 +55,10 @@
 
     <label for="password">Kodeord: </label>
     <input type="password" id="password" name="password" required><br><br>
+
     <a href="{{url_for('register')}}">Har ikke en account? Sign up</a> <br>
     <button type="submit">Login</button><br>
+    
   </form>
 </body>
 </html>
