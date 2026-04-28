@@ -82,8 +82,11 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    document.getElementById('message').textContent = 'Registration successful!';
+                    document.getElementById('message').textContent = 'Registration successful! Redirecting to login...';
                     document.getElementById('registerForm').reset();
+                    setTimeout(() => {
+                        window.location.href = '{{url_for("show_login")}}';
+                    }, 2000);
                 } else {
                     document.getElementById('message').textContent = result.error || 'Registration failed';
                 }
