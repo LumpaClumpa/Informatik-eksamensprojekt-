@@ -55,68 +55,43 @@
         <input type="radio" id="teacher" name="role" value="teacher" required> Lærer
         <input type="radio" id="student" name="role" value="student" required> Elev <br><br>
 
-        <div id="teacherPasswordBox" style="display:none;">
-            <label for="teacherPassword">Lærer-kode:</label>
-            <input type="password" id="teacherPassword">
-            <br><br>
-        </div>
-
-        <a href="/login">Har en account? sign in</a> <br>
+        <a href="{{url_for('show_login')}}">Har en account? sign in</a> <br>
         <button type="submit">Sign Up</button><br>
         <div id="message"></div>
     </form>
 
     <script>
-    document.getElementById('registerForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        const role = document.querySelector('input[name="role"]:checked').value;
-        const teacherPasswordBox = document.getElementById('teacherPasswordBox');
-        const teacherPassword = document.getElementById('teacherPassword');
-        const message = document.getElementById('message');
+            const userData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                role: document.querySelector('input[name="role"]:checked').value
+            };
 
-        if (role === 'teacher' && teacherPasswordBox.style.display === 'none') {
-            teacherPasswordBox.style.display = 'block';
-            teacherPassword.required = true;
-            teacherPassword.focus();
-            message.textContent = 'Indtast lærer-koden';
-            return;
-        }
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
 
-        if (role === 'teacher' && teacherPassword.value !== '9876') {
-            message.textContent = 'Forkert lærer-kode';
-            return;
-        }
+                const result = await response.json();
 
-        const userData = {
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-            role: role,
-            teacher_password: role === 'teacher' ? teacherPassword.value : null
-        };
-
-        try {
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            });
-
-            if (response.ok) {
-                message.textContent = 'Registration successful!';
-                window.location.href = "/home";
-            } else {
-                const error = await response.json();
-                message.textContent = error.error || 'Registration failed';
+                if (response.ok) {
+                    document.getElementById('message').textContent = 'Registration successful!';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    document.getElementById('message').textContent = result.error || 'Registration failed';
+                }
+            } catch (error) {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
             }
-
-        } catch (error) {
-            message.textContent = 'Error: ' + error.message;
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 </html>
