@@ -112,11 +112,8 @@ def create_items():
     insert_readings(data)
     return jsonify({'status': 'Data inserted successfully'}), 201
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
-    if request.method == 'GET':
-        return "Use POST to register" #This is only for testing
-
     data = request.get_json()
 
     conn = sqlite3.connect(DB_PATH)
@@ -136,6 +133,9 @@ def register():
     except sqlite3.IntegrityError:
         return jsonify({"error": "username already exists"}), 400
 
+@app.route('/register', methods=['GET'])
+def show_register():
+    return render_template("register.html")
 
 
 @app.route('/login', methods=['POST'])
