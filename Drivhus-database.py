@@ -25,7 +25,7 @@ def init_db():
 
     cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
 
-    cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR UNIQUE NOT NULL, teacher_password VARCHAR UNIQUE NOT NULL. role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR NOT NULL, teacher_password VARCHAR, role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
 
 tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log", "users"]
 
@@ -112,6 +112,7 @@ def create_items():
     insert_readings(data)
     return jsonify({'status': 'Data inserted successfully'}), 201
 
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -120,18 +121,25 @@ def register():
     cur = conn.cursor()
 
     try:
+        teacher_pwd = data.get('teacher_password')
+        teacher_pwd_hash = hash_password(teacher_pwd) if teacher_pwd else None
+
         cur.execute(
-            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+            "INSERT INTO users (username, password_hash, teacher_password, role) VALUES (?, ?, ?, ?)",
             (
                 data['username'],
                 hash_password(data['password']),
+                teacher_pwd_hash,
                 data['role']
             )
         )
         conn.commit()
-        return jsonify({"status": "user created"})
+        conn.close()
+        return jsonify({"status": "user created"}), 201
     except sqlite3.IntegrityError:
+        conn.close()
         return jsonify({"error": "username already exists"}), 400
+
 
 @app.route('/register', methods=['GET'])
 def show_register():
@@ -146,18 +154,32 @@ def login():
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT id, password_hash, role FROM users WHERE username=?",
+        "SELECT id, password_hash, teacher_password, role FROM users WHERE username=?",
         (data['username'],)
     )
     user = cur.fetchone()
+    conn.close()
 
-    if user and user[1] == hash_password(data['password']):
-        return jsonify({
-            "user_id": user[0],
-            "role": user[2]
-        })
-    else:
-        return jsonify({"error": "invalid login"}), 401
+    if user:
+        password_hash = user[1]
+        teacher_password_hash = user[2]
+
+        # Check if it's a student login
+        if password_hash == hash_password(data.get('password', '')):
+            return jsonify({
+                "user_id": user[0],
+                "role": "student"
+            }), 200
+
+        # Check if it's a teacher login
+        elif teacher_password_hash and teacher_password_hash == hash_password(data.get('teacher_password', '')):
+            return jsonify({
+                "user_id": user[0],
+                "role": "teacher"
+            }), 200
+
+    return jsonify({"error": "invalid login"}), 401
+
 
 @app.route('/login', methods=['GET'])
 def show_login():

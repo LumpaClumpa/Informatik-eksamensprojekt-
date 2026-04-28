@@ -67,51 +67,56 @@
     </form>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-    
-            const role = document.querySelector('input[name="role"]:checked').value;
-            const teacherPasswordBox = document.getElementById('teacherPasswordBox');
-            const teacherPassword = document.getElementById('teacherPassword');
-            const message = document.getElementById('message');
-    
-            if (role === 'teacher' && teacherPasswordBox.style.display === 'none') {
-                teacherPasswordBox.style.display = 'block';
-                teacherPassword.required = true;
-                teacherPassword.focus();
-                message.textContent = 'Indtast lærer-koden';
-                return;
-            }
-    
-            if (role === 'teacher' && teacherPassword.value !== '9876') {
-                message.textContent = 'Forkert lærer-kode';
-                return;
-            }
-    
-            const userData = {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-                role: role
-            };
-    
-            try {
-                const response = await fetch('/register', {
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const teacherPasswordBox = document.getElementById('teacherPasswordBox');
+        const teacherPassword = document.getElementById('teacherPassword');
+        const message = document.getElementById('message');
+
+        if (role === 'teacher' && teacherPasswordBox.style.display === 'none') {
+            teacherPasswordBox.style.display = 'block';
+            teacherPassword.required = true;
+            teacherPassword.focus();
+            message.textContent = 'Indtast lærer-koden';
+            return;
+        }
+
+        if (role === 'teacher' && teacherPassword.value !== '9876') {
+            message.textContent = 'Forkert lærer-kode';
+            return;
+        }
+
+        const userData = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            role: role,
+            teacher_password: role === 'teacher' ? teacherPassword.value : null
+        };
+
+        try {
+            const response = await fetch('/register', {
                 method: 'POST',
-                body: new FormData(document.getElementById('registerForm'))
-                });
-    
-                if (response.ok) {
-                    message.textContent = 'Registration successful!';
-                    window.location.href = "/home";
-                } else {
-                    message.textContent = 'Registration failed';
-                }
-    
-            } catch (error) {
-                message.textContent = 'Error: ' + error.message;
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                message.textContent = 'Registration successful!';
+                window.location.href = "/home";
+            } else {
+                const error = await response.json();
+                message.textContent = error.error || 'Registration failed';
             }
-        });
-    </script>
+
+        } catch (error) {
+            message.textContent = 'Error: ' + error.message;
+        }
+    });
+</script>
 
 </body>
 </html>
