@@ -159,7 +159,9 @@ def login():
     else:
         return jsonify({"error": "invalid login"}), 401
 
-
+@app.route('/login', methods=['GET'])
+def show_login():
+    return render_template("login.html")
 
 readings = { # example data structure for readings
     "devices": [
