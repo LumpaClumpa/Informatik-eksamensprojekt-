@@ -1,9 +1,11 @@
+from errno import EUSERS
 from socket import gethostname
 import sqlite3
 import json
 from time import time
 from random import random
 from flask import Flask, render_template, make_response, request, jsonify, url_for
+import hashlib
 
 app = Flask(__name__)
 
@@ -21,10 +23,14 @@ def init_db():
 
     cur.execute("""CREATE TABLE IF NOT EXISTS zones (plant_id INTEGER PRIMARY KEY, zone_id INTEGER, plant VARCHAR, plant_type VARCHAR, is_active VARCHAR, water_ammount INTEGER)""")
 
-    cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at, DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
 
-tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log"]
+    cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR UNIQUE NOT NULL, role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
 
+tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log", "users"]
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def insert_readings(readings_dict):
     conn = sqlite3.connect(DB_PATH)
@@ -38,6 +44,8 @@ def insert_readings(readings_dict):
                 cur.execute(f"INSERT OR REPLACE INTO {table} ({columns}) VALUES ({placeholders})", values)
     conn.commit()
     conn.close()
+
+
 
 @app.route('/')
 def home():
@@ -103,6 +111,54 @@ def create_items():
     # Assume data is the readings dict with table names as keys
     insert_readings(data)
     return jsonify({'status': 'Data inserted successfully'}), 201
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'GET':
+        return "Use POST to register" #This is only for testing
+
+    data = request.get_json()
+
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    try:
+        cur.execute(
+            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+            (
+                data['username'],
+                hash_password(data['password']),
+                data['role']
+            )
+        )
+        conn.commit()
+        return jsonify({"status": "user created"})
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "username already exists"}), 400
+
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT id, password_hash, role FROM users WHERE username=?",
+        (data['username'],)
+    )
+    user = cur.fetchone()
+
+    if user and user[1] == hash_password(data['password']):
+        return jsonify({
+            "user_id": user[0],
+            "role": user[2]
+        })
+    else:
+        return jsonify({"error": "invalid login"}), 401
+
 
 
 readings = { # example data structure for readings
