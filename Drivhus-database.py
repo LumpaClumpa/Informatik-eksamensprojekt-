@@ -25,7 +25,7 @@ def init_db():
 
     cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
 
-    cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR UNIQUE NOT NULL, role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR UNIQUE NOT NULL, teacher_password VARCHAR UNIQUE NOT NULL. role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
 
 tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log", "users"]
 
@@ -49,7 +49,7 @@ def insert_readings(readings_dict):
 
 @app.route('/')
 def home():
-    return "HELLO WORLD"
+    return render_template("home.html")
 
 '''@app.route('/items', methods=['POST'])
 def create_item():

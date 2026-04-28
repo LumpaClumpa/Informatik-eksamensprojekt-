@@ -32,7 +32,7 @@
       background-color: #04AA6D;
       color: white;
     }
-    </style>
+</style>
 <body>
     <div class="topnav">
         <a href="{{url_for('home')}}">Home</a>
@@ -44,20 +44,54 @@
 
     <h1>Register en account</h1>
 
-    <form method="POST">
+    <form id="registerForm">
         <label for="username">Brugernavn: </label>
         <input type="text" id="username" name="username" required><br><br>
-    
+
         <label for="password">Kodeord: </label>
         <input type="password" id="password" name="password" required><br><br>
 
-        <input type="radio" id="teacher" name="choice" value="1"> Lærer
-        <input type="radio" id="student" name="choice" value="2"> Elev <br><br>
-    
-        <a href="{{url_for('login')}}">Har en account? sign in</a> <br>
+        <label>Rolle:</label>
+        <input type="radio" id="teacher" name="role" value="teacher" required> Lærer
+        <input type="radio" id="student" name="role" value="student" required> Elev <br><br>
+
+        <a href="{{url_for('show_login')}}">Har en account? sign in</a> <br>
         <button type="submit">Sign Up</button><br>
-        
-      </form>
+        <div id="message"></div>
+    </form>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const userData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                role: document.querySelector('input[name="role"]:checked').value
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('message').textContent = 'Registration successful!';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    document.getElementById('message').textContent = result.error || 'Registration failed';
+                }
+            } catch (error) {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
 
 </body>
 </html>
