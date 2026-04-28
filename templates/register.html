@@ -35,11 +35,11 @@
 </style>
 <body>
     <div class="topnav">
-        <a href="{{url_for('home')}}">Home</a>
+        <a href="/home">Home</a>
         <a href="#opgaver">Opgaver</a>
         <a href="#planter">Plante Oversigt</a>
-        <a class="active" href="#login">LogIn</a>
-        <a href="#signout">SignOut</a>
+        <a href="/login">LogIn</a>
+        <a class="active" href="#signout">SignOut</a>
     </div>
 
     <h1>Register en account</h1>
@@ -55,7 +55,13 @@
         <input type="radio" id="teacher" name="role" value="teacher" required> Lærer
         <input type="radio" id="student" name="role" value="student" required> Elev <br><br>
 
-        <a href="{{url_for('show_login')}}">Har en account? sign in</a> <br>
+        <div id="teacherPasswordBox" style="display:none;">
+            <label for="teacherPassword">Lærer-kode:</label>
+            <input type="password" id="teacherPassword">
+            <br><br>
+        </div>
+
+        <a href="/login">Har en account? sign in</a> <br>
         <button type="submit">Sign Up</button><br>
         <div id="message"></div>
     </form>
@@ -63,32 +69,46 @@
     <script>
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
+    
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const teacherPasswordBox = document.getElementById('teacherPasswordBox');
+            const teacherPassword = document.getElementById('teacherPassword');
+            const message = document.getElementById('message');
+    
+            if (role === 'teacher' && teacherPasswordBox.style.display === 'none') {
+                teacherPasswordBox.style.display = 'block';
+                teacherPassword.required = true;
+                teacherPassword.focus();
+                message.textContent = 'Indtast lærer-koden';
+                return;
+            }
+    
+            if (role === 'teacher' && teacherPassword.value !== '9876') {
+                message.textContent = 'Forkert lærer-kode';
+                return;
+            }
+    
             const userData = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
-                role: document.querySelector('input[name="role"]:checked').value
+                role: role
             };
-
+    
             try {
                 const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
+                method: 'POST',
+                body: new FormData(document.getElementById('registerForm'))
                 });
-
-                const result = await response.json();
-
+    
                 if (response.ok) {
-                    document.getElementById('message').textContent = 'Registration successful!';
-                    document.getElementById('registerForm').reset();
+                    message.textContent = 'Registration successful!';
+                    window.location.href = "/home";
                 } else {
-                    document.getElementById('message').textContent = result.error || 'Registration failed';
+                    message.textContent = 'Registration failed';
                 }
+    
             } catch (error) {
-                document.getElementById('message').textContent = 'Error: ' + error.message;
+                message.textContent = 'Error: ' + error.message;
             }
         });
     </script>
