@@ -14,19 +14,16 @@ DB_PATH = "drivhus.db"
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    # create tables
+
     cur.execute("""CREATE TABLE IF NOT EXISTS devices (user_id INTEGER PRIMARY KEY,users VARCHAR, device_id INTEGER, status VARCHAR, is_teacher VARCHAR)""")
-
     cur.execute("""CREATE TABLE IF NOT EXISTS sensors (sensor_id INTEGER PRIMARY KEY,zone_id INTEGER,sensor_type VARCHAR,is_active VARCHAR)""")
-
     cur.execute("""CREATE TABLE IF NOT EXISTS sensor_readings (reading_id INTEGER PRIMARY KEY,sensor_id INTEGER,recorded_at DATE, is_active VARCHAR, unit VARCHAR)""")
-
     cur.execute("""CREATE TABLE IF NOT EXISTS zones (plant_id INTEGER PRIMARY KEY, zone_id INTEGER, plant VARCHAR, plant_type VARCHAR, is_active VARCHAR, water_ammount INTEGER)""")
-
     cur.execute("""CREATE TABLE IF NOT EXISTS watering_log (log_id INTEGER PRIMARY KEY, zone_id INTEGER, started_at DATE, ended_at DATE, trigger_type VARCHAR, water_litres FLOAT, status VARCHAR)""")
-
     cur.execute("""CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username VARCHAR UNIQUE NOT NULL, password_hash VARCHAR NOT NULL, teacher_password VARCHAR, role VARCHAR NOT NULL CHECK(role IN ('teacher', 'student')))""")
 
+    conn.commit()
+    conn.close()
 tables = ["devices", "sensors", "sensor_readings", "zones", "watering_log", "users"]
 
 def hash_password(password):
@@ -102,6 +99,23 @@ def get_items():
 
     conn.close()
     return jsonify(data)
+
+@app.route('/plants')
+def plants_overview():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT plant_id, zone_id, plant, plant_type, is_active, water_ammount
+        FROM zones
+        ORDER BY zone_id, plant
+    """)
+
+    plants = cur.fetchall()
+    conn.close()
+
+    return render_template("plants.html", plants=plants)
 
 @app.route('/items', methods=['POST'])
 def create_items():
