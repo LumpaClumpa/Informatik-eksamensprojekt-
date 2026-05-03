@@ -11,9 +11,7 @@ DB_PATH = "drivhus.db"
 TABLES = ["devices", "sensors", "sensor_readings", "zones", "watering_log", "users", "plant_tasks"]
 
 
-# ──────────────────────────────────────────────
 # DATABASE SETUP
-# ──────────────────────────────────────────────
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -82,9 +80,7 @@ def init_db():
     conn.close()
 
 
-# ──────────────────────────────────────────────
 # HELPERS
-# ──────────────────────────────────────────────
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -111,9 +107,9 @@ def insert_readings(readings_dict):
     conn.close()
 
 
-# ──────────────────────────────────────────────
+
 # ROUTES — GENERELLE SIDER
-# ──────────────────────────────────────────────
+
 
 @app.route('/')
 def home():
@@ -133,9 +129,9 @@ def plants_overview():
     return render_template("plants.html", plants=plants)
 
 
-# ──────────────────────────────────────────────
+
 # ROUTES — AUTH
-# ──────────────────────────────────────────────
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -211,9 +207,9 @@ def register():
         conn.close()
 
 
-# ──────────────────────────────────────────────
+
 # ROUTES — ROLLE SIDER
-# ──────────────────────────────────────────────
+
 
 @app.route('/velkommen-laerer')
 def velkommen_laerer():
@@ -229,9 +225,9 @@ def velkommen_elev():
     return render_template("elev.html")
 
 
-# ──────────────────────────────────────────────
+
 # ROUTES — OPGAVER
-# ──────────────────────────────────────────────
+
 
 @app.route('/opgaver')
 def opgaver():
@@ -307,9 +303,9 @@ def complete_task(task_id):
     return redirect(url_for("opgaver"))
 
 
-# ──────────────────────────────────────────────
+
 # ROUTES — API
-# ──────────────────────────────────────────────
+
 
 @app.route('/items', methods=['GET'])
 def get_items():
@@ -337,9 +333,7 @@ def create_items():
     return jsonify({'status': 'Data inserted successfully'}), 201
 
 
-# ──────────────────────────────────────────────
 # EKSEMPELDATA & START
-# ──────────────────────────────────────────────
 
 EXAMPLE_DATA = {
     "devices": [
