@@ -176,33 +176,38 @@ def show_register():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.form
+    data = request.get_json()
 
     username = data.get('username')
     password = data.get('password')
-    role     = data.get('role')
+    role = data.get('role')
 
     if not username or not password or not role:
         return jsonify({"error": "Mangler brugernavn, kodeord eller rolle"}), 400
 
     conn = get_db()
     cur = conn.cursor()
+
     try:
         teacher_pwd = data.get('teacher_password')
         teacher_pwd_hash = hash_password(teacher_pwd) if teacher_pwd else None
+
         cur.execute(
             "INSERT INTO users (username, password_hash, teacher_password, role) VALUES (?, ?, ?, ?)",
             (username, hash_password(password), teacher_pwd_hash, role)
         )
+
         conn.commit()
-        return redirect(url_for("login"))
+        return jsonify({"success": True}), 200
+
     except sqlite3.IntegrityError:
         return jsonify({"error": "Brugernavnet findes allerede"}), 400
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
     finally:
         conn.close()
-
 
 # ROUTES — ROLLE SIDER
 
