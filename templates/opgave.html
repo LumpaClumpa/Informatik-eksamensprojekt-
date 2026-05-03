@@ -107,14 +107,14 @@
         <p><strong>Plantetype:</strong> {{ task.plant_type }}</p>
 
         {% if task.is_complete %}
-            <p>✅ Fuldført af {{ task.completed_by }} den {{ task.completed_at }}</p>
+            <p>Fuldført af {{ task.completed_by }} den {{ task.completed_at }}</p>
         {% else %}
             {% if role == "student" %}
                 <form action="/opgaver/complete/{{ task.task_id }}" method="POST">
                     <button type="submit">Vand plante? Ja ✓</button>
                 </form>
             {% else %}
-                <p>⏳ Ikke fuldført endnu</p>
+                <p>Ikke fuldført endnu</p>
             {% endif %}
         {% endif %}
     </div>
