@@ -3,19 +3,14 @@
 // WiFi stuff
 #include <WiFi.h>
 #include <HTTPClient.h>
-const char* ssid = "iPhone"; // WiFi name
-const char* password = "ztqzygzx"; // WiFi password
-const char* serverName = "http://172.20.10.7:5000/items"; // IP
+const char* ssid = "INSERT_NAME"; // WiFi name
+const char* password = "INSERT_PASSWORD"; // WiFi password
+const char* serverName = "http://INSERT_IP:5000/items"; // IP
 
 // Sensor stuff
 #include "DHT.h"
-#define DHTPIN 18
-// Uncomment whatever type you're using!
-//#define DHTTYPE DHT11   // DHT 11 
+#define DHTPIN 5
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
-//#define DHTTYPE DHT21   // DHT 21 (AM2301)
-
-
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
@@ -32,8 +27,6 @@ void setup() {
 }
 
 void loop() {
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float h = dht.readHumidity(); // Humidity
   float t = dht.readTemperature(); // Temperature
 
