@@ -84,6 +84,13 @@ def init_db():
     )""")
 
     conn.commit()
+
+
+
+    #cur.execute("INSERT INTO ZONES (plant_id, zone_id, plant, plant_type, is_active, water_ammount) VALUES (?, ?, ?, ?, ?, ?)", (1, 1, "Akelje", "Blomst", "True", 100)) 
+
+    conn.commit()
+
     conn.close()
 
 
@@ -122,6 +129,7 @@ def home():
     locked = not session.get("logged_in")
     return render_template("home.html", locked=locked)
 
+
 @app.route('/plants')
 def plants_overview():
     conn = get_db()
@@ -131,6 +139,7 @@ def plants_overview():
         FROM zones ORDER BY zone_id, plant
     """)
     plants = cur.fetchall()
+    print(plants)
     conn.close()
     return render_template("plants.html", plants=plants)
 
@@ -186,6 +195,14 @@ def register():
     username = data.get('username')
     password = data.get('password')
     role = data.get('role')
+
+
+    if role == "teacher":
+        # teacher selected, need to verify the teacher secret
+        teacher_secret = data.get("teachersecret")
+
+        if teacher_secret != "9876":
+            return jsonify({"error": "Ugyldig kode"}), 400
 
     if not username or not password or not role:
         return jsonify({"error": "Mangler brugernavn, kodeord eller rolle"}), 400
@@ -249,8 +266,11 @@ def opgaver():
     """)
     tasks = cur.fetchall()
 
-    cur.execute("SELECT plant_id, zone_id, plant, plant_type FROM zones WHERE is_active = 'yes'")
+    cur.execute("SELECT plant_id, zone_id, plant, plant_type FROM zones WHERE is_active = 'True'")
     plants = cur.fetchall()
+
+    print(plants)
+
     conn.close()
 
     return render_template("opgave.html",
@@ -347,9 +367,8 @@ EXAMPLE_DATA = {
     ],
 }
 
-init_db()                    # <-- altid køres
-insert_readings(EXAMPLE_DATA)  # <-- altid køres
-
 if __name__ == '__main__':
+    init_db()
+    insert_readings(EXAMPLE_DATA)
     if 'liveconsole' not in gethostname():
         app.run(debug=True)
