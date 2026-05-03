@@ -44,14 +44,5 @@
 
     <h1>Du er nu logget ind som lærer</h1>
     <h3>Fori du er logget ind som lærer kan du nu lave opgaver til eleverne under opgaver, og se hvornår en elev har lavet en opgave</h3>
-
-    {% if locked %}
-    <div class="login-overlay">
-      <div class="login-box">
-        <h2>Log ind for at få adgang</h2>
-        <a href="{{ url_for('login') }}">Go to login</a>
-      </div>
-    </div>
-    {% endif %}
   </body>
 </html>
