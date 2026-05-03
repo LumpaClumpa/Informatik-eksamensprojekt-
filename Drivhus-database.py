@@ -39,7 +39,8 @@ def init_db():
         sensor_id   INTEGER,
         recorded_at DATE,
         is_active   VARCHAR,
-        unit        VARCHAR
+        unit        VARCHAR,
+        reading     INTEGER
     )""")
 
     cur.execute("""CREATE TABLE IF NOT EXISTS zones (
@@ -325,7 +326,7 @@ def get_items():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/items', methods=['POST'])
+@app.route('/items', methods=['POST']) # Is this from old one?
 def create_items():
     data = request.get_json()
     if not data:
@@ -352,4 +353,4 @@ insert_readings(EXAMPLE_DATA)  # <-- altid køres
 
 if __name__ == '__main__':
     if 'liveconsole' not in gethostname():
-        app.run(debug=True)
+        app.run(host="0.0.0.0", port=5000, debug=True)
