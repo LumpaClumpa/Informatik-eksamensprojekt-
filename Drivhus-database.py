@@ -69,6 +69,11 @@ def init_db():
         role             VARCHAR NOT NULL CHECK(role IN ('teacher', 'student'))
     )""")
 
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN teacher_password VARCHAR")
+    except sqlite3.OperationalError:
+        pass
+
     cur.execute("""CREATE TABLE IF NOT EXISTS plant_tasks (
         task_id      INTEGER PRIMARY KEY AUTOINCREMENT,
         plant_id     INTEGER NOT NULL,
@@ -176,7 +181,7 @@ def show_register():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
+    data = request.get_json() or {}
 
     username = data.get('username')
     password = data.get('password')
