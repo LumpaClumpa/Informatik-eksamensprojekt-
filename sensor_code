@@ -62,7 +62,7 @@ void loop() {
     tempObj["recorded_at"] = "2026-05-03";
     tempObj["is_active"] = "yes";
     tempObj["unit"] = "C";
-    //tempObj["value"] = 100; // fake data
+    tempObj["reading"] = 100; // fake data, replace with t to get live value
 
     // Humidity object
     JsonObject humObj = readings.createNestedObject();
@@ -70,7 +70,7 @@ void loop() {
     humObj["recorded_at"] = "2026-05-03";
     humObj["is_active"] = "yes";
     humObj["unit"] = "%";
-    //humObj["value"] = 50; // fake data
+    humObj["reading"] = 50; // fake data, replace with h to get live value
 
     // Convert to string
     String json;
