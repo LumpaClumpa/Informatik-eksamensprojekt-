@@ -55,7 +55,7 @@
         <input type="radio" id="teacher" name="role" value="teacher" required> Lærer
         <input type="radio" id="student" name="role" value="student" required> Elev <br><br>
 
-        <a href="{{url_for('show_login')}}">Har en account? sign in</a> <br>
+        <a href="{{url_for('login')}}">Har en account? sign in</a> <br>
         <button type="submit">Sign Up</button><br>
         <div id="message"></div>
     </form>
@@ -85,7 +85,7 @@
                     document.getElementById('message').textContent = 'Registration successful! Redirecting to login...';
                     document.getElementById('registerForm').reset();
                     setTimeout(() => {
-                        window.location.href = '{{url_for("show_login")}}';
+                        window.location.href = '{{url_for("login")}}';
                     }, 2000);
                 } else {
                     document.getElementById('message').textContent = result.error || 'Registration failed';
