@@ -337,8 +337,9 @@ EXAMPLE_DATA = {
     ],
 }
 
+init_db()                    # <-- altid køres
+insert_readings(EXAMPLE_DATA)  # <-- altid køres
+
 if __name__ == '__main__':
-    init_db()
-    insert_readings(EXAMPLE_DATA)
     if 'liveconsole' not in gethostname():
         app.run(debug=True)
